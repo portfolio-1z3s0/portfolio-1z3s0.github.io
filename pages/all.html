@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>作品一覧 | 仮タイトル</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <a href="../">作品ポートフォリオ</a>
+      </div>
+      <nav>
+        <a class="link" href="../">最新</a>
+        <a class="link" href="all.html" aria-current="page">一覧</a>
+        <a class="link" href="about.html">概要</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <h1>作品一覧</h1>
+      <div class="toolbar">
+        <input id="q" class="input" type="search" placeholder="タイトル / タグで検索" />
+        <select id="sort" class="select">
+          <option value="date-desc">新しい順</option>
+          <option value="date-asc">古い順</option>
+          <option value="title-asc">タイトル A→Z</option>
+          <option value="title-desc">タイトル Z→A</option>
+        </select>
+        <button id="clear" class="btn">クリア</button>
+      </div>
+    </section>
+
+    <section class="section wrap">
+      <div id="grid" class="grid"></div>
+      <p id="empty" class="notice" style="display:none">該当作品なし</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div class="credits">© <span id="year"></span> 仮タイトル</div>
+      <div class="links">
+        <a href="privacy.html">プライバシーポリシー</a>
+        <a href="terms.html">利用規約</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/all.js"></script>
+</body>
+</html>
