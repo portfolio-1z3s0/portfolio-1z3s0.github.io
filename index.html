@@ -1,10 +1,301 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>作品ポートフォリオ | 仮タイトル</title>
+  <meta name="description" content="ポートフォリオ雛形。" />
+  <meta property="og:title" content="作品ポートフォリオ" />
+  <meta property="og:description" content="ポートフォリオ雛形。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/img/og-placeholder.jpg" />
+  <!-- ↑OG画像、SNSのカードになるやつ -->>
+  <meta name="theme-color" content="#111827" />
+  <!--
+    フォルダ構成（最終形の想定）
+    /
+    ├─ index.html            # ヒーロー＋最新作
+    ├─ pages/
+    ├─ assets/{css,js,img,fonts}
+    ├─ data/artworks.json
+    └─ .nojekyll
+
+    この index.html は “単一ファイル雛形” です。
+    まずはこれ一枚でプレビュー→運用時に CSS/JS を assets/ へ分離＆ data/artworks.json を作成してください。
+  -->
+  <style>
+    :root {
+      --bg: #0b0f17;        /* 背景（ほぼ黒） */
+      --fg: #e5e7eb;        /* 文字（明るい灰） */
+      --muted: #9ca3af;     /* 補助 */
+      --brand: #38bdf8;     /* アクセント（空色） */
+      --card: #101827;      /* カード背景 */
+      --border: #1f2937;    /* 枠線 */
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: radial-gradient(1200px 800px at 70% -10%, rgba(56,189,248,0.12), transparent 60%), var(--bg);
+      color: var(--fg);
+      letter-spacing: .02em;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+    header {
+      position: sticky; top: 0; z-index: 50; backdrop-filter: saturate(180%) blur(8px);
+      background: linear-gradient(to bottom, rgba(11,15,23,.9), rgba(11,15,23,.6));
+      border-bottom: 1px solid var(--border);
+    }
+    .nav { display:flex; align-items:center; justify-content:space-between; height:60px; }
+    .brand { display:flex; align-items:center; gap:.75rem; font-weight:700; }
+    .brand-dot { width:10px; height:10px; border-radius:50%; background: var(--brand); box-shadow: 0 0 20px var(--brand); }
+    .nav a.link { color: var(--muted); font-size:.95rem; margin-left: 1rem; }
+    .nav a.link[aria-current="page"] { color: var(--fg); }
+
+    .hero { padding: 72px 0 32px; }
+    .hero h1 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 12px; line-height: 1.1; }
+    .hero p { color: var(--muted); margin: 0; font-size: clamp(14px, 2.5vw, 16px); }
+
+    .toolbar { display:flex; align-items:center; gap: .5rem; margin: 18px 0 0; flex-wrap: wrap; }
+    .input { background: #0a1220; color: var(--fg); border: 1px solid var(--border); border-radius: 12px; height: 40px; padding: 0 12px; min-width: 200px; }
+    .select { background: #0a1220; color: var(--fg); border: 1px solid var(--border); border-radius: 12px; height: 40px; padding: 0 12px; }
+    .btn { height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--border); background: #0a1220; color: var(--fg); cursor: pointer; }
+    .btn:hover { border-color: #2b3a54; }
+
+    .section { padding: 24px 0 64px; }
+    .section h2 { font-size: 20px; margin: 0 0 16px; font-weight: 700; }
+
+    .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .card { grid-column: span 12; background: linear-gradient(180deg, #0b1322, #0c1526); border:1px solid var(--border); border-radius: 16px; overflow: hidden; transition: transform .2s ease; }
+    .card:hover { transform: translateY(-2px); }
+    .thumb { aspect-ratio: 4 / 3; background:#091223; display:grid; place-items:center; }
+    .thumb img { width:100%; height:100%; object-fit: cover; }
+    .meta { padding: 12px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .title { font-weight: 600; font-size: 16px; }
+    .sub { color: var(--muted); font-size: 13px; }
+    .tags { display:flex; gap: 6px; flex-wrap: wrap; }
+    .tag { font-size: 12px; color: #a5b4fc; background: #141b2f; border: 1px solid #1f2a44; padding: 2px 8px; border-radius: 999px; }
+
+    .grid > .card { grid-column: span 12; }
+    @media (min-width: 640px) { .grid > .card { grid-column: span 6; } }
+    @media (min-width: 1024px) { .grid > .card { grid-column: span 4; } }
+
+    footer { border-top: 1px solid var(--border); color: var(--muted); }
+    .footer-inner { padding: 28px 0; display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap:8px; }
+    .credits { font-size: 12px; }
+    .links { display:flex; gap: 12px; font-size: 12px; }
+
+    /* スケルトン */
+    .skeleton { position: relative; overflow: hidden; background: #0a1220; }
+    .skeleton::after { content:""; position:absolute; inset:0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); transform: translateX(-100%); animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+    /* アラート */
+    .notice { border: 1px solid #2b3a54; background: #0a1220; color: var(--muted); padding: 12px 14px; border-radius: 12px; font-size: 13px; }
+  </style>
 </head>
 <body>
-	<h1>test page</h1>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <a href="/" aria-current="page">作品ポートフォリオ</a>
+      </div>
+      <nav>
+        <a class="link" href="/" aria-current="page">最新</a>
+        <a class="link" href="pages/all.html">一覧</a>
+        <a class="link" href="pages/about.html">概要</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap" aria-labelledby="hero-h">
+      <h1 id="hero-h">最新作 / Featured</h1>
+      <p>友人の作品を紹介する個人運営サイトの雛形。データは <code>data/artworks.json</code> から読み込みます。</p>
+      <div class="toolbar" role="region" aria-label="作品の検索と並び替え">
+        <input id="q" class="input" type="search" placeholder="タイトル / タグで検索" aria-label="検索" />
+        <select id="sort" class="select" aria-label="並び順">
+          <option value="date-desc">新しい順</option>
+          <option value="date-asc">古い順</option>
+          <option value="title-asc">タイトル A→Z</option>
+          <option value="title-desc">タイトル Z→A</option>
+        </select>
+        <button id="clear" class="btn" type="button">クリア</button>
+      </div>
+    </section>
+
+    <section class="section wrap" aria-labelledby="latest-h">
+      <h2 id="latest-h">最新作</h2>
+      <div id="grid" class="grid" aria-live="polite" aria-busy="true"></div>
+      <p id="empty" class="notice" style="display:none">検索条件に一致する作品がありません。</p>
+      <div id="loadNotice" class="notice" style="margin-top:12px; display:none"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div class="credits">© <span id="year"></span> 仮タイトル</div>
+      <div class="links">
+        <a href="pages/privacy.html">プライバシーポリシー</a>
+        <a href="pages/terms.html">利用規約</a>
+        <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!--
+    データの用意：data/artworks.json を作る
+    例：
+    [
+      {
+        "id": "sculpt-001",
+        "title": "青の静物",
+        "artist": "Your Friend",
+        "year": 2024,
+        "date": "2024-12-15",
+        "tags": ["彫刻", "木彫"],
+        "thumb": "assets/img/blue-still-thumb.jpg",
+        "image": "assets/img/blue-still.jpg",
+        "description": "青を基調とした木彫作品。",
+        "featured": true
+      }
+    ]
+
+    ※ 初期はデータが無くても動作するよう、下の <script id="sampleData"> をフォールバックとして使用します。
+  -->
+  <script id="sampleData" type="application/json">[
+    {
+      "id": "sample-001",
+      "title": "サンプル作品 A",
+      "artist": "Sample Artist",
+      "year": 2025,
+      "date": "2025-07-01",
+      "tags": ["彫刻", "木彫"],
+      "thumb": "assets/img/sample-a-thumb.jpg",
+      "image": "assets/img/sample-a.jpg",
+      "description": "プレビュー用のダミーデータ。",
+      "featured": true
+    },
+    {
+      "id": "sample-002",
+      "title": "サンプル作品 B",
+      "artist": "Sample Artist",
+      "year": 2024,
+      "date": "2024-11-10",
+      "tags": ["絵画", "油彩"],
+      "thumb": "assets/img/sample-b-thumb.jpg",
+      "image": "assets/img/sample-b.jpg",
+      "description": "プレビュー用のダミーデータ。",
+      "featured": true
+    },
+    {
+      "id": "sample-003",
+      "title": "サンプル作品 C",
+      "artist": "Sample Artist",
+      "year": 2023,
+      "date": "2023-05-20",
+      "tags": ["デッサン"],
+      "thumb": "assets/img/sample-c-thumb.jpg",
+      "image": "assets/img/sample-c.jpg",
+      "description": "プレビュー用のダミーデータ。",
+      "featured": false
+    }
+  ]</script>
+
+  <script>
+    const $ = (s, r=document) => r.querySelector(s);
+    const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+    const state = { items: [], filtered: [], query: '', sort: 'date-desc' };
+
+    const els = {
+      grid: $('#grid'),
+      empty: $('#empty'),
+      loadNotice: $('#loadNotice'),
+      q: $('#q'),
+      sort: $('#sort'),
+      clear: $('#clear'),
+    };
+
+    function byDateDesc(a,b){ return new Date(b.date) - new Date(a.date); }
+    function byDateAsc(a,b){ return new Date(a.date) - new Date(b.date); }
+    function byTitleAsc(a,b){ return a.title.localeCompare(b.title, 'ja'); }
+    function byTitleDesc(a,b){ return b.title.localeCompare(a.title, 'ja'); }
+
+    function render(items){
+      els.grid.setAttribute('aria-busy', 'false');
+      els.grid.innerHTML = '';
+      if(!items.length){ els.empty.style.display = 'block'; return; }
+      els.empty.style.display = 'none';
+      for(const x of items){
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <a href="pages/detail.html?id=${encodeURIComponent(x.id)}" class="thumb ${x.thumb? '': 'skeleton'}" aria-label="${x.title}">
+            ${x.thumb ? `<img src="${x.thumb}" alt="${x.title} のサムネイル">` : ''}
+          </a>
+          <div class="meta">
+            <div>
+              <div class="title">${x.title}</div>
+              <div class="sub">${x.artist ?? ''} · ${x.year ?? ''}</div>
+            </div>
+            <div class="tags">${(x.tags||[]).slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+          </div>
+        `;
+        els.grid.appendChild(card);
+      }
+    }
+
+    function applyFilters(){
+      const q = state.query.trim().toLowerCase();
+      let arr = [...state.items].filter(x => x.featured !== false); // デフォルトは featured を優先
+      if(q){
+        arr = arr.filter(x =>
+          (x.title||'').toLowerCase().includes(q) ||
+          (x.tags||[]).some(t => (t||'').toLowerCase().includes(q))
+        );
+      }
+      switch(state.sort){
+        case 'date-desc': arr.sort(byDateDesc); break;
+        case 'date-asc': arr.sort(byDateAsc); break;
+        case 'title-asc': arr.sort(byTitleAsc); break;
+        case 'title-desc': arr.sort(byTitleDesc); break;
+      }
+      state.filtered = arr.slice(0, 12); // 最新 12 件
+      render(state.filtered);
+    }
+
+    async function loadData(){
+      const path = 'data/artworks.json';
+      els.loadNotice.style.display = 'block';
+      els.loadNotice.textContent = `読み込み中…（${path} が無ければサンプルを使用）`;
+      try {
+        const res = await fetch(path, { cache: 'no-store' });
+        if(!res.ok) throw new Error('no data file');
+        state.items = await res.json();
+        els.loadNotice.style.display = 'none';
+      } catch (e){
+        const fallback = $('#sampleData');
+        state.items = JSON.parse(fallback.textContent);
+        els.loadNotice.textContent = 'data/artworks.json が見つからないため、サンプルデータで表示しています。';
+      }
+      applyFilters();
+    }
+
+    function bindUI(){
+      els.q.addEventListener('input', (e)=>{ state.query = e.target.value; applyFilters(); });
+      els.sort.addEventListener('change', (e)=>{ state.sort = e.target.value; applyFilters(); });
+      els.clear.addEventListener('click', ()=>{ state.query=''; els.q.value=''; state.sort='date-desc'; els.sort.value='date-desc'; applyFilters(); });
+      $('#year').textContent = new Date().getFullYear();
+    }
+
+    bindUI();
+    loadData();
+  </script>
 </body>
 </html>
